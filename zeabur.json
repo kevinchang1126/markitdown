@@ -1,0 +1,10 @@
+{
+  "services": [
+    {
+      "name": "markitdown-api",
+      "source": {
+        "type": "dockerfile"
+      }
+    }
+  ]
+}

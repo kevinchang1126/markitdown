@@ -21,7 +21,7 @@ RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . /app
 RUN pip --no-cache-dir install \
-    /app/packages/markitdown[all] \
+    /app/packages/markitdown[api,all] \
     /app/packages/markitdown-sample-plugin
 
 # Default USERID and GROUPID
@@ -30,4 +30,6 @@ ARG GROUPID=nogroup
 
 USER $USERID:$GROUPID
 
-ENTRYPOINT [ "markitdown" ]
+EXPOSE 8080
+
+CMD ["uvicorn", "markitdown.api_server:app", "--host", "0.0.0.0", "--port", "8080"]

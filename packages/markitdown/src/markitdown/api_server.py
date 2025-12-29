@@ -1,48 +1,59 @@
 
-import asyncio
-import tempfile
-from pathlib import Path
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
-
+import io
+import uvicorn
+from fastapi import FastAPI, UploadFile, File, Response
+from fastapi.responses import StreamingResponse
 from ._markitdown import MarkItDown
+from ._stream_info import StreamInfo
 
-app = FastAPI()
-md = MarkItDown()
+app = FastAPI(
+    title="Markitdown API",
+    description="A web API for the Markitdown file conversion tool.",
+    version="1.0.0"
+)
 
-@app.post("/convert")
+@app.get("/", tags=["Health Check"])
+async def read_root():
+    """
+    Root endpoint for health checks.
+    """
+    return {"status": "ok", "message": "Markitdown API is running"}
+
+@app.post("/convert", tags=["Conversion"])
 async def convert_file(file: UploadFile = File(...)):
     """
-    Accepts a file upload, converts it to Markdown using markitdown,
-    and returns the result as JSON.
+    Accepts a file, converts it to Markdown using Markitdown,
+    and returns the result as a streaming response.
     """
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="No file name provided.")
-
-    temp_file_path = ""
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as temp_file:
-            content = await file.read()
-            temp_file.write(content)
-            temp_file_path = temp_file.name
+        # Create a MarkItDown instance
+        md = MarkItDown()
 
-        markdown_result = await asyncio.to_thread(md.convert, Path(temp_file_path))
-        markdown_content = markdown_result.text_content
+        # Get file content
+        file_content = await file.read()
+        
+        # Create StreamInfo from the uploaded file
+        stream_info = StreamInfo.from_bytes(file_content, source_filename=file.filename)
 
-        return JSONResponse(content={"filename": file.filename, "markdown": markdown_content})
+        # Perform the conversion
+        result = md.convert(stream_info=stream_info)
+
+        # Return the markdown content
+        return Response(content=result.markdown, media_type="text/markdown")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred during conversion: {str(e)}")
+        # Basic error handling
+        return Response(
+            content=f"An error occurred during conversion: {str(e)}",
+            status_code=500,
+            media_type="text/plain"
+        )
 
-    finally:
-        # Clean up the temporary file
-        if temp_file_path and Path(temp_file_path).exists():
-            Path(temp_file_path).unlink()
+def serve(host="0.0.0.0", port=8000):
+    """
+    Starts the uvicorn server for the FastAPI application.
+    """
+    uvicorn.run(app, host=host, port=port)
 
-@app.get("/")
-def read_root():
-    return {"message": "Markitdown API is running. Use the /convert endpoint to process files."}
-
-# To run this server locally for testing:
-# uvicorn packages.markitdown.src.markitdown.api_server:app --reload
+if __name__ == "__main__":
+    serve()

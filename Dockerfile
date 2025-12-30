@@ -20,6 +20,7 @@ COPY . .
 # 4. Install Python dependencies
 # Installing both markitdown (with all dependencies) and the sample plugin
 RUN pip --no-cache-dir install \
+    openai \
     ./packages/markitdown[all] \
     ./packages/markitdown-sample-plugin
 

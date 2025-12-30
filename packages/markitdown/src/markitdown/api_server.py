@@ -6,6 +6,7 @@ import traceback
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.responses import StreamingResponse
+from openai import OpenAI
 from ._markitdown import MarkItDown
 from ._stream_info import StreamInfo
 
@@ -33,8 +34,23 @@ async def convert_file(file: UploadFile = File(...)):
     and returns the result as a streaming response.
     """
     try:
+        # Initialize OpenAI client if API key is present
+        api_key = os.environ.get("OPENAI_API_KEY")
+        llm_client = None
+        llm_model = None
+
+        if api_key:
+            try:
+                llm_client = OpenAI(api_key=api_key)
+                llm_model = "gpt-4o"
+                logger.info("OpenAI client initialized for image analysis.")
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {e}")
+        else:
+            logger.warning("OPENAI_API_KEY not found. Image analysis will be disabled.")
+
         # Create a MarkItDown instance
-        md = MarkItDown()
+        md = MarkItDown(llm_client=llm_client, llm_model=llm_model)
 
         # Get file content
         file_content = await file.read()

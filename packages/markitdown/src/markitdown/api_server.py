@@ -1,6 +1,8 @@
 
 import io
 import os
+import logging
+import traceback
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.responses import StreamingResponse
@@ -12,6 +14,10 @@ app = FastAPI(
     description="A web API for the Markitdown file conversion tool.",
     version="1.0.0"
 )
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @app.get("/", tags=["Health Check"])
 async def read_root():
@@ -43,7 +49,10 @@ async def convert_file(file: UploadFile = File(...)):
         return Response(content=result.markdown, media_type="text/markdown")
 
     except Exception as e:
-        # Basic error handling
+        # Log the full traceback for debugging
+        logger.error(f"Error converting file: {e}")
+        logger.error(traceback.format_exc())
+        
         return Response(
             content=f"An error occurred during conversion: {str(e)}",
             status_code=500,

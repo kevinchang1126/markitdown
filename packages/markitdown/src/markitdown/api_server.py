@@ -39,14 +39,15 @@ async def convert_file(file: UploadFile = File(...)):
         # Get file content
         file_content = await file.read()
         
-        # Create StreamInfo from the uploaded file
-        stream_info = StreamInfo.from_bytes(file_content, source_filename=file.filename)
+        # Create StreamInfo manually (StreamInfo.from_bytes does not exist)
+        extension = os.path.splitext(file.filename)[1] if file.filename else None
+        stream_info = StreamInfo(filename=file.filename, extension=extension)
 
-        # Perform the conversion
-        result = md.convert(stream_info=stream_info)
+        # Perform the conversion using io.BytesIO as source
+        result = md.convert(io.BytesIO(file_content), stream_info=stream_info)
 
         # Return the markdown content
-        return Response(content=result.markdown, media_type="text/markdown")
+        return Response(content=result.text_content, media_type="text/markdown")
 
     except Exception as e:
         # Log the full traceback for debugging

@@ -1,5 +1,6 @@
 
 import io
+import os
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.responses import StreamingResponse
@@ -49,10 +50,12 @@ async def convert_file(file: UploadFile = File(...)):
             media_type="text/plain"
         )
 
-def serve(host="0.0.0.0", port=8080):
+def serve(host="0.0.0.0", port=None):
     """
     Starts the uvicorn server for the FastAPI application.
     """
+    if port is None:
+        port = int(os.environ.get("PORT", os.environ.get("WEB_PORT", 8080)))
     uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":

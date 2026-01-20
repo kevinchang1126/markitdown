@@ -1,7 +1,8 @@
 # 1. Base Image and System Dependencies
-FROM python:3.13-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
 ENV EXIFTOOL_PATH=/usr/bin/exiftool
 ENV FFMPEG_PATH=/usr/bin/ffmpeg
 
@@ -9,6 +10,7 @@ ENV FFMPEG_PATH=/usr/bin/ffmpeg
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     exiftool \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Set up Application Directory

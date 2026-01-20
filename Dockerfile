@@ -27,7 +27,7 @@ RUN pip --no-cache-dir install \
     ./packages/markitdown-sample-plugin
 
 # 5. Expose the port the API server will run on
-EXPOSE 8000
+EXPOSE 8080
 
 # 6. Run as a non-root user for better security
 RUN useradd -m -u 1000 appuser

@@ -81,7 +81,11 @@ def serve(host="0.0.0.0", port=None):
     Starts the uvicorn server for the FastAPI application.
     """
     if port is None:
-        port = int(os.environ.get("PORT", os.environ.get("WEB_PORT", 8080)))
+        env_port = os.environ.get("PORT", os.environ.get("WEB_PORT"))
+        logger.info(f"Environment PORT variable: {env_port}")
+        port = int(env_port) if env_port else 8080
+    
+    logger.info(f"Starting server on {host}:{port}")
     uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":

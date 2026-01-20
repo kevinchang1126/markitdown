@@ -33,4 +33,4 @@ USER appuser
 
 # 7. Set the command to run the API server
 # Use 0.0.0.0 to make it accessible outside the container
-CMD python -m markitdown.api_server
+CMD ["python", "-m", "markitdown.api_server"]

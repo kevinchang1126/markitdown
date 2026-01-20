@@ -33,4 +33,4 @@ USER appuser
 
 # 7. Set the command to run the API server
 # Use 0.0.0.0 to make it accessible outside the container
-CMD uvicorn markitdown.api_server:app --host 0.0.0.0 --port ${PORT:-${WEB_PORT:-8000}}
+CMD python -m markitdown.api_server

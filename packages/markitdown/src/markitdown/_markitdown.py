@@ -114,10 +114,10 @@ class MarkItDown:
 
         # TODO - remove these (see enable_builtins)
         self._llm_client: Any = None
-        self._llm_model: Union[str | None] = None
-        self._llm_prompt: Union[str | None] = None
-        self._exiftool_path: Union[str | None] = None
-        self._style_map: Union[str | None] = None
+        self._llm_model: Optional[str] = None
+        self._llm_prompt: Optional[str] = None
+        self._exiftool_path: Optional[str] = None
+        self._style_map: Optional[str] = None
 
         # Register the converters
         self._converters: List[ConverterRegistration] = []
@@ -764,7 +764,7 @@ class MarkItDown:
 
         return guesses
 
-    def _normalize_charset(self, charset: str | None) -> str | None:
+    def _normalize_charset(self, charset: Optional[str]) -> Optional[str]:
         """
         Normalize a charset string to a canonical form.
         """

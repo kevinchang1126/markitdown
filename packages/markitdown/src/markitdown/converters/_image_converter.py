@@ -75,6 +75,8 @@ class ImageConverter(DocumentConverter):
                 client=llm_client,
                 model=llm_model,
                 prompt=kwargs.get("llm_prompt"),
+                max_tokens=kwargs.get("llm_max_tokens"),
+                detail=kwargs.get("llm_image_detail"),
             )
 
             if llm_description is not None:
@@ -91,7 +93,11 @@ class ImageConverter(DocumentConverter):
         *,
         client,
         model,
+        client,
+        model,
         prompt=None,
+        max_tokens=None,
+        detail=None,
     ) -> Union[None, str]:
         if prompt is None or prompt.strip() == "":
             prompt = "Write a detailed caption for this image."
@@ -127,6 +133,7 @@ class ImageConverter(DocumentConverter):
                         "type": "image_url",
                         "image_url": {
                             "url": data_uri,
+                            "detail": detail or "auto",
                         },
                     },
                 ],
@@ -134,5 +141,5 @@ class ImageConverter(DocumentConverter):
         ]
 
         # Call the OpenAI API
-        response = client.chat.completions.create(model=model, messages=messages)
+        response = client.chat.completions.create(model=model, messages=messages, max_tokens=max_tokens)
         return response.choices[0].message.content

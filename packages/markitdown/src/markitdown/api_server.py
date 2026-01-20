@@ -42,15 +42,32 @@ async def convert_file(file: UploadFile = File(...)):
         if api_key:
             try:
                 llm_client = OpenAI(api_key=api_key)
-                llm_model = "gpt-4o"
+                llm_model = "gpt-4o-mini"
                 logger.info("OpenAI client initialized for image analysis.")
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI client: {e}")
         else:
             logger.warning("OPENAI_API_KEY not found. Image analysis will be disabled.")
 
-        # Create a MarkItDown instance
-        md = MarkItDown(llm_client=llm_client, llm_model=llm_model)
+        # Read environment variables for LLM configuration
+        llm_prompt = os.environ.get("ZEABUR_LLM_PROMPT", "請用一句話簡潔描述這張圖片，不要輸出冗長內容。")
+        
+        llm_max_tokens_env = os.environ.get("ZEABUR_LLM_MAX_TOKENS", "500")
+        try:
+             llm_max_tokens = int(llm_max_tokens_env)
+        except ValueError:
+             llm_max_tokens = 500
+
+        llm_image_detail = os.environ.get("ZEABUR_LLM_IMAGE_DETAIL", "low")
+
+        # Create a MarkItDown instance environment variables
+        md = MarkItDown(
+            llm_client=llm_client, 
+            llm_model=llm_model,
+            llm_prompt=llm_prompt,
+            llm_max_tokens=llm_max_tokens,
+            llm_image_detail=llm_image_detail
+        )
 
         # Get file content
         file_content = await file.read()

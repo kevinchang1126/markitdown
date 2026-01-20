@@ -5,7 +5,7 @@ from .._stream_info import StreamInfo
 
 
 def llm_caption(
-    file_stream: BinaryIO, stream_info: StreamInfo, *, client, model, prompt=None
+    file_stream: BinaryIO, stream_info: StreamInfo, *, client, model, prompt=None, max_tokens=None, detail=None
 ) -> Union[None, str]:
     if prompt is None or prompt.strip() == "":
         prompt = "Write a detailed caption for this image."
@@ -39,6 +39,7 @@ def llm_caption(
                     "type": "image_url",
                     "image_url": {
                         "url": data_uri,
+                        "detail": detail or "auto",
                     },
                 },
             ],
@@ -46,5 +47,5 @@ def llm_caption(
     ]
 
     # Call the OpenAI API
-    response = client.chat.completions.create(model=model, messages=messages)
+    response = client.chat.completions.create(model=model, messages=messages, max_tokens=max_tokens)
     return response.choices[0].message.content

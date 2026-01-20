@@ -115,7 +115,10 @@ class MarkItDown:
         # TODO - remove these (see enable_builtins)
         self._llm_client: Any = None
         self._llm_model: Optional[str] = None
+        self._llm_model: Optional[str] = None
         self._llm_prompt: Optional[str] = None
+        self._llm_max_tokens: Optional[int] = None
+        self._llm_image_detail: Optional[str] = None
         self._exiftool_path: Optional[str] = None
         self._style_map: Optional[str] = None
 
@@ -141,6 +144,8 @@ class MarkItDown:
             self._llm_client = kwargs.get("llm_client")
             self._llm_model = kwargs.get("llm_model")
             self._llm_prompt = kwargs.get("llm_prompt")
+            self._llm_max_tokens = kwargs.get("llm_max_tokens")
+            self._llm_image_detail = kwargs.get("llm_image_detail")
             self._exiftool_path = kwargs.get("exiftool_path")
             self._style_map = kwargs.get("style_map")
 
@@ -563,6 +568,12 @@ class MarkItDown:
 
                 if "llm_prompt" not in _kwargs and self._llm_prompt is not None:
                     _kwargs["llm_prompt"] = self._llm_prompt
+                
+                if "llm_max_tokens" not in _kwargs and self._llm_max_tokens is not None:
+                    _kwargs["llm_max_tokens"] = self._llm_max_tokens
+
+                if "llm_image_detail" not in _kwargs and self._llm_image_detail is not None:
+                    _kwargs["llm_image_detail"] = self._llm_image_detail
 
                 if "style_map" not in _kwargs and self._style_map is not None:
                     _kwargs["style_map"] = self._style_map

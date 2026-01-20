@@ -93,8 +93,6 @@ class ImageConverter(DocumentConverter):
         *,
         client,
         model,
-        client,
-        model,
         prompt=None,
         max_tokens=None,
         detail=None,

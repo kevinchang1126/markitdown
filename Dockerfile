@@ -23,6 +23,7 @@ COPY . .
 # Installing both markitdown (with all dependencies) and the sample plugin
 RUN pip --no-cache-dir install \
     openai \
+    google-generativeai \
     ./packages/markitdown[all] \
     ./packages/markitdown-sample-plugin
 

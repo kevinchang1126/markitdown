@@ -39,7 +39,24 @@ async def convert_file(file: UploadFile = File(...)):
         llm_client = None
         llm_model = None
 
-        if api_key:
+        # Determine LLM provider
+        llm_provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+        gemini_api_key = os.environ.get("GEMINI_API_KEY")
+
+        if llm_provider == "gemini" or (gemini_api_key and not api_key):
+             try:
+                import google.generativeai as genai
+                if not gemini_api_key:
+                    raise ValueError("GEMINI_API_KEY not found.")
+                
+                genai.configure(api_key=gemini_api_key)
+                # Use a standard Gemini model
+                llm_model = "gemini-1.5-flash" 
+                llm_client = genai.GenerativeModel(llm_model)
+                logger.info(f"Gemini client initialized with model {llm_model}.")
+             except Exception as e:
+                logger.error(f"Failed to initialize Gemini client: {e}")
+        elif api_key:
             try:
                 llm_client = OpenAI(api_key=api_key)
                 llm_model = "gpt-4o-mini"
@@ -47,7 +64,7 @@ async def convert_file(file: UploadFile = File(...)):
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI client: {e}")
         else:
-            logger.warning("OPENAI_API_KEY not found. Image analysis will be disabled.")
+            logger.warning("No valid LLM API key found (OPENAI_API_KEY or GEMINI_API_KEY). Image analysis will be disabled.")
 
         # Read environment variables for LLM configuration
         llm_prompt = os.environ.get("ZEABUR_LLM_PROMPT", "請用一句話簡潔描述這張圖片，不要輸出冗長內容。")

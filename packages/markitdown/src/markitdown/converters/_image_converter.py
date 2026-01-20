@@ -118,7 +118,33 @@ class ImageConverter(DocumentConverter):
         finally:
             file_stream.seek(cur_pos)
 
-        # Prepare the data-uri
+        # Helper to check if it's a Gemini client (duck typing or class check)
+        is_gemini = hasattr(client, "generate_content")
+
+        if is_gemini:
+             # For Gemini, we can pass the image data directly
+             import PIL.Image
+             import io
+
+             try:
+                 # Decode base64 to bytes
+                 image_data = base64.b64decode(base64_image)
+                 image = PIL.Image.open(io.BytesIO(image_data))
+                 
+                 # Gemini doesn't use max_tokens in the same way in generate_content (generation_config needed)
+                 # configuring generation config
+                 from google.generativeai import GenerationConfig
+                 generation_config = GenerationConfig(
+                     max_output_tokens=max_tokens
+                 ) if max_tokens else None
+
+                 response = client.generate_content([prompt, image], generation_config=generation_config)
+                 return response.text
+             except Exception as e:
+                 # Fallback or error logging could happen here, but we'll return None for now
+                 return f"Gemini Error: {e}"
+
+        # Prepare the data-uri for OpenAI
         data_uri = f"data:{content_type};base64,{base64_image}"
 
         # Prepare the OpenAI API request
